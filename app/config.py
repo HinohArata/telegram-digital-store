@@ -44,5 +44,16 @@ class Settings(BaseSettings):
             return [int(x) for x in v]
         return []
 
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        # Otomatis sesuaikan URL dari Railway atau provider lain untuk driver asyncpg
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+asyncpg://", 1)
+        if v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
+
+
 
 settings = Settings()
