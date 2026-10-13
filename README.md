@@ -68,15 +68,9 @@ python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().
 ```
 Simpan hasilnya ke variabel `ENCRYPTION_KEY`.
 
-### 3. Setup Database Supabase
-1. Buat project baru di [Supabase](https://supabase.com).
-2. Masuk ke menu **Project Settings** $\rightarrow$ **Database** $\rightarrow$ **Connection Pooling** (atau **Connection string**).
-3. Pilih mode **URI** (Session mode port 5432 atau Transaction pooler port 6543).
-4. Ganti protokol awal dari `postgresql://` menjadi `postgresql+asyncpg://`.
-   *Contoh:*
-   ```text
-   postgresql+asyncpg://postgres.[REF]:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
-   ```
+### 3. Setup Database (Railway PostgreSQL atau Supabase)
+- **Railway PostgreSQL (Paling Praktis)**: Di project Railway, klik **+ New** $\rightarrow$ **Database** $\rightarrow$ **PostgreSQL**.
+- **Supabase**: Ambil Connection URI dari menu Database Settings Supabase.
 
 ### 4. Setup Akun Mayar.id
 1. Daftar akun di [Mayar.id](https://mayar.id).
@@ -87,20 +81,24 @@ Simpan hasilnya ke variabel `ENCRYPTION_KEY`.
 
 ---
 
-## 🚂 Panduan Deployment ke Railway
+## 🚂 Panduan Deployment ke Railway (Menggunakan Docker Image Jadi)
 
-1. Push folder proyek ini ke repository GitHub Anda (private repository direkomendasikan).
-2. Buka dashboard [Railway.app](https://railway.app) $\rightarrow$ klik **New Project** $\rightarrow$ **Deploy from GitHub repo**.
-3. Pilih repository bot Anda. Railway akan otomatis mendeteksi `Dockerfile`.
-4. Masuk ke tab **Variables** di Railway dan tambahkan variabel environment berikut:
+Karena image Docker di-build otomatis oleh GitHub Actions ke GitHub Container Registry (GHCR), deploy di Railway menjadi sangat cepat tanpa proses build:
+
+1. Buka dashboard [Railway.app](https://railway.app) $\rightarrow$ klik **New Project**.
+2. Tambahkan Database: Klik **+ New** $\rightarrow$ **Database** $\rightarrow$ **Add PostgreSQL**.
+3. Tambahkan Service Bot dari Docker Image:
+   - Klik **+ New** $\rightarrow$ pilih **Docker Image**.
+   - Masukkan image: `ghcr.io/hinoharata/telegram-digital-store:latest`.
+4. Masuk ke tab **Variables** service bot dan tambahkan variabel:
+   - `DATABASE_URL`: `${{Postgres.DATABASE_URL}}`
    - `BOT_TOKEN`: Token bot Telegram Anda.
    - `ADMIN_IDS`: ID Telegram Anda (misal: `123456789`).
-   - `DATABASE_URL`: Connection string Supabase Anda.
    - `ENCRYPTION_KEY`: Kunci Fernet yang telah Anda generate.
    - `MAYAR_API_KEY`: API Key dari Mayar.id.
    - `MAYAR_WEBHOOK_TOKEN`: Token rahasia webhook Mayar.
 5. Masuk ke tab **Settings** di Railway $\rightarrow$ di bagian **Networking**, klik **Generate Domain** (misal: `store-bot-production.up.railway.app`).
-6. Buka kembali dashboard Mayar.id, lalu daftarkan Webhook Callback URL:
+6. Daftarkan Webhook Callback URL di dashboard Mayar.id:
    ```text
    https://store-bot-production.up.railway.app/webhook/mayar
    ```
